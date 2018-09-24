@@ -1,0 +1,332 @@
+\documentclass{article}
+% Change "article" to "report" to get rid of page number on title page
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{setspace}
+\usepackage{Tabbing}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{extramarks}
+\usepackage{url}
+\usepackage{chngpage}
+\usepackage{longtable}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{enumitem}
+\usepackage{morefloats}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{indentfirst}
+\usepackage{lscape}
+\usepackage{pdflscape}
+\usepackage{natbib}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.9}
+\usepackage[toc,page]{appendix}
+\providecommand{\e}[1]{\ensuremath{\times 10^{#1} \times}}
+
+% In case you need to adjust margins:
+\topmargin=-0.45in      % used for overleaf
+%\topmargin=0.25in      % used for mac
+\evensidemargin=0in     %
+\oddsidemargin=0in      %
+\textwidth=6.5in        %
+%\textheight=9.75in       % used for mac
+\textheight=9.25in       % used for overleaf
+\headsep=0.25in         %
+
+% Homework Specific Information
+\newcommand{\hmwkTitle}{Progress Report 1}
+\newcommand{\hmwkDueDate}{Monday,\ September\  24,\ 2018}
+\newcommand{\hmwkClass}{Final Project}
+\newcommand{\hmwkClassTime}{CSE 597}
+\newcommand{\hmwkAuthorName}{Chirag\ H.\ Satish}
+\newcommand{\hmwkNames}{chs5187}
+
+% Setup the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkNames}
+\rhead{\hmwkClassTime: \hmwkTitle} 
+\cfoot{Page\ \thepage\ of\ \pageref{LastPage}}
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Make title
+
+\title{\vspace{2in}\textmd{\textbf{\hmwkClass:\ \hmwkTitle}} \\
+\vspace{0.1in}\large{ \hmwkClassTime}\vspace{3in}}
+
+\author{\textbf{\hmwkAuthorName} \\ \vspace{0.1in}
+\hmwkDueDate }
+\date{} % to take away today's date
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\begin{spacing}{1.1}
+\maketitle
+
+\newpage
+\section*{Abstract}
+
+Linear regression problems are frequently encountered in the fields of machine learning and statistics. It involves finding a line which best fits the given data points. Normal equations enable us to find the solution to these problems in a fast and scaling-free method. Various ML packages have methods to determine the regression model for the given data. In this project, we have solved the normal equation using Gaussian elimination  as a direct solver and Gauss Siedel method as the iterative solver. 
+
+\section{Problem of Interest}
+
+\begin{itemize}
+    \item Linear regression is a linear approach to modelling the relationship between a scalar response (or dependent variable) and one or more explanatory variables (or independent variables). The simplest form of the regression equation with one dependent and one independent variable is defined by the formula y = c + b*x, where y is the estimated dependent variable score, c is the constant, b is the regression coefficient, and x is the score on the independent variable. Our example data set consists of housing data, where we intend to predict the house prices based on parameters like size, number of bedrooms, age of the house, number of floors, etc.
+    \item General overview \newline
+    Linear regression consists of finding the best-fitting straight line through the points. The best-fitting line is called a regression line. We assume that our data set has n features and m training examples. x\textsubscript{i}\textsuperscript{j} represents the j\textsuperscript{th} feature in the i\textsuperscript{th} training example. The hypothesis for linear regression is defined as $$h_\theta(x)=\theta^Tx$$ where x is an n dimensional vector of features and $\theta$ is the parameter vector that needs to be determined such that the best fit line so obtained minimizes the mean squared error.
+    \item Scientific merits \newline
+    Regression is frequently used to model continuous data and predict future values based on historical trends. We may use regression to predict stock prices, housing prices and fuel prices, to name a few. All machine learning tools provide functions to perform linear regression. A faster regression solver is always preferable.   
+    \item Fields where relevant \newline
+    Machine learning, data mining, statistics
+    \item Alternative solution \newline
+    Gradient descent \cite{GDRef} is the most popular solution to regression problems. However, gradient descent can be slow and requires pre-processing of training data such as scaling, which can be computationally expensive.
+    \item Normal Equation solution \newline 
+    This approach is used to determine the parameter vector $\theta$ using the X and Y matrices, described in the next section. The formula is mentioned below
+    $$\theta=(X^TX)^{-1}(X^TY)$$
+\end{itemize}
+
+\subsection{Numerical Set-up}
+
+\begin{itemize}
+    \item Setting up A matrix and B vector \newline
+    Given a data set of n features and m training examples, we first construct X matrix which is m*(n+1) matrix. The first column is populated with 1's. The Y vector is an m-dimensional vector containing the values of the dependant variable. Once we have X and Y, A matrix is calculated as (X.X\textsuperscript{T}) and B vector is calculated as (X\textsuperscript{T}.Y). As stated before, we need to calculate the parameter vector $\theta$.
+    \item Problem size \newline
+    The production problem consists of a 120,000 by 12 A matrix and a 40,000 dimensional B vector. For testing, we are considering a small set of training examples and features i.e. a 10000 by 5 A vector and 10000 dimensional B vector. The data set was obtained in \cite{UCIDataset}
+    
+\end{itemize}
+
+\section{Solvers}
+
+\subsection{Direct Solver}
+
+\begin{itemize}
+    \item To solve the problem, we are employing Gauss elimination. 
+    \item Since a normal equation solver needs to work on all types of input data, we need a solver which is robust and makes no assumptions about the underlying A matrix and B vector. Hence, Gaussian elimination fits our requirement.
+    \item The O3 optimization flag has been used for compilation. Since there are multiple nested loops, it is a perfect chance for vectorization and unrolling. The execution time is halved as compared to running the code without O3. SSE intrinsic has also been utilized in matrix transpose calculation. 
+    \item Timing for test problem: \newline Test problem executed in 2000ns with 0ns required for the backfill operation.
+    \item Projection of time for production problem: \newline The estimate for production problem is 4500ns as the dimensionality of the production problem is about 2.25 times the test problem.
+    \item Memory being allocated for test problem is 2828KB.
+    \item  Memory being used by the program is 2828KB. The task uses the same amount of memory as allocated.
+    \item Projection of memory required for production problem is 35,000KB on the basis that the production problem involves matrices of 120,000 by 5 compared to 10,000 by 5 in the test problem.
+\end{itemize}
+
+\subsection{Iterative Solver}
+
+\begin{itemize}
+    \item We are employing Gauss Siedel method for solving this problem. 
+    \item As mentioned above, a normal equation solver cannot make any assumptions about the type of underlying data. Both the Jacobi and Gauss Siedel methods are potential solutions. However, we have chosen Gauss Siedel as it is faster.
+    \item The user enters the epsilon - a value in the order of $10^{-5}$ gives reasonable results. For residuals, we are running the loop till the residual for all the unknowns become less than epsilon. In essence, we have used L2 norm as all the elements of X need to be accurate for obtaining the best fit line.
+    \item The O3 optimization flag has been used for compilation. Since there are multiple nested loops, it is a perfect chance for vectorization and unrolling. The execution time is halved as compared to running the code without O3. SSE intrinsic has been utilized in matrix transpose calculation.
+    \item Timing (Measured without optimization flags)\newline When initialized to all 0's, the execution time was 2000ns. Random initialization resulted in an execution time of 17,000ns. Good guess initialization is not applicable for our method as it is impossible to deduce an approximate solution owing to the huge data set size. However if we run Gauss Siedel for 10 iterations and plug in the intermediate values, we get a total run time of 4000ns.
+
+
+\begin{tikzpicture}
+\begin{axis}[
+    title={Convergence Plot},
+    xlabel={Iterations},
+    ylabel={Epsilon},
+    xmin=0, xmax=20,
+    ymin=0, ymax=1,
+    xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20},
+    ytick={0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1},
+    %ytick={0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500},
+    legend pos=north west,
+    ymajorgrids=true,
+    grid style=dashed,
+]
+
+\addplot[
+    color=blue,
+    ]
+    coordinates {
+    (0,450.8384)
+    (1,1.1560)
+    (2,1.0173)
+    (3,0.8566)
+    (4,0.6920)
+    (5,0.5350)
+    (6,0.3921)
+    (7,0.2666)
+    (8,0.1597)
+    (9,0.0709)
+    (10,0.0008)
+    (11,0.0571)
+    (12,0.0998)
+    (13,0.1311)
+    (14,0.1525)
+    (15,0.1660)
+    (16,0.1729)
+    (17,0.1747)
+    (18,0.1725)
+    };
+\addplot[
+    color=red,
+    ]
+    coordinates {
+   (0,0.0002)
+    (1,0.0001)
+    (2,0.0001)
+    (3,0.0001)
+    (4,0.0001)
+    (5,0.0001)
+    (6,0.0000)
+    (7,0.0000)
+    (8,0.0000)
+    (9,0.0000)
+    (10,0.0000)
+    (11,0.0000)
+    (12,0.0000)
+    (13,0.0000)
+    (14,0.0000)
+    (15,0.0000)
+    (16,0.0000)
+    (17,0.0000)
+    (18,0.0000)
+    };
+\addplot[
+    color=yellow,
+    ]
+    coordinates {
+   (0,0.1847)
+    (1,0.1840)
+    (2,0.1778)
+    (3,0.1683)
+    (4,0.1566)
+    (5,0.1440)
+    (6,0.1310)
+    (7,0.1181)
+    (8,0.1058)
+    (9,0.0941)
+    (10,0.0833)
+    (11,0.0734)
+    (12,0.0645)
+    (13,0.0564)
+    (14,0.0491)
+    (15,0.0427)
+    (16,0.0370)
+    (17,0.0319)
+    (18,0.0275)
+    };
+\addplot[
+    color=green,
+    ]
+    coordinates {
+   (0,0.7428)
+    (1,0.5853)
+    (2,0.4556)
+    (3,0.3496)
+    (4,0.2636)
+    (5,0.1944)
+    (6,0.1392)
+    (7,0.0955)
+    (8,0.0613)
+    (9,0.0349)
+    (10,0.0148)
+    (11,0.0002)
+    (12,0.0112)
+    (13,0.0189)
+    (14,0.0240)
+    (15,0.0272)
+    (16,0.0289)
+    (17,0.0295)
+    (18,0.0292)
+    };
+\addplot[
+    color=black,
+    ]
+    coordinates {
+   (0,0.0107)
+    (1,0.0169)
+    (2,0.0196)
+    (3,0.0201)
+    (4,0.0193)
+    (5,0.0176)
+    (6,0.0154)
+    (7,0.0132)
+    (8,0.0110)
+    (9,0.0089)
+    (10,0.0070)
+    (11,0.0053)
+    (12,0.0039)
+    (13,0.0027)
+    (14,0.0017)
+    (15,0.0009)
+    (16,0.0003)
+    (17,0.0002)
+    (18,0.0006)
+    };
+    \legend{x0,x1,x2,x3,x4}
+    
+\end{axis}
+\end{tikzpicture}
+    \newline While it is expected that all the x values converge at one point, we observe that x0 does not converge. This is because, once the ideal x0 value wrt epsilon is obtained, we do not break out of the loop - we continue till all the values from x0 - xN reach the ideal value wrt epsilon. Even without total convergence, we get reasonably accurate values to build the model.
+    \item The estimate for production problem is 4500ns as the dimensionality of the production problem is about 2.25 times the test problem.
+    \item Memory being allocated for test problem is 2848KB.
+    \item Memory being used by task is 2848KB. The task uses the same amount of memory as allocated.
+    \item Projection of memory required for production problem is 35,000KB on the basis that the production problem involves matrices of 120,000 by 5 compared to 10,000 by 5 in the test problem.
+\end{itemize}
+
+\section{Solver Comparison}
+
+\begin{itemize}
+    \item The iterative and direct solvers give the same performance as far as execution time is concerned for my test problem. However, for larger matrices, the iterative solver will surely outperform the direct solver. The iterative solve also requires slightly more memory (20KB in our test).  
+    \item Solver choice depends on the number of features in the data set. For problems with up to less features, we expect there to be no performance difference between the two solvers, and choosing the direct solver is recommended. For a data set with many features, the iterative solver will perform better and is the better choice.
+    \item The production problem projections are based on comparisons between test and production problem set sizes. The compute time of matrix products required to form the A and B matrices will be high for the production problem. Parallelization will help reduce this.
+    
+\end{itemize}
+
+\section{Discussion and Conclusions}
+
+\begin{enumerate}
+    \item In this problem, we have considered a data set containing housing data, using which the A and B matrices were constructed for building the linear regression model. Following this, the parameter vector $\theta$ was calculated using a direct solver (Gauss Elimination) and iterative solver (Gauss Siedel method). The performance of the two solvers were studied in detail and compared.
+    \item Linear regression solvers cannot make any assumptions about the underlying data. This calls for using robust solvers which work on a wide range of data values. For this reason, Gauss Elimination and Gauss Siedel methods were chosen, and the results obtained validate our choice for this problem.
+    \item The primary bottleneck in our solver are the matrix multiplication steps. We have to perform one transpose followed by two matrix multiplications, which can take a very long time for large data sets. Parallelization can help alleviate this problem.
+\end{enumerate}
+
+
+
+
+
+
+\newpage
+\begin{appendices}
+
+\section{Acknowledgements}
+
+I would like to acknowledge Dr. Adam Lavely and Dr. Chris Blanton for helping formulate the course material and providing general guidance. I also thank my classmate Sahiti for the help extended. 
+
+\section{Code}
+
+\begin{itemize}
+    \item You can get my assignment onto ACI using the command: \newline git clone https://github.com/chiragsatish/SerialNESolver.git
+    \item main.cpp - Contains the main() function \newline transpose.cpp - Function to calculate matrix transpose \newline multiply.cpp - Calculates product of two matrices/matrix and vector \newline gaussElimination.cpp - Direct solver code \newline gaussSiedel.cpp - Iterative solver \newline A.txt - File containing the data set (independant variable values) \newline B.txt - File containing dependant variable values \newline Makefile - Make file 
+    \item Compilation Instructions:\newline make \newline ./execute
+    \item The code was run on a single node comp-sc-0240 of Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz processors. 
+\end{itemize}
+
+\section{Licensing and Publishing}
+
+\begin{itemize}
+    \item GNU GPL has been chosen as I want the software to be freely available to anyone for usage and modification.
+    \item The code will be published on GitHub. As GitHub has a huge community of developers, it is an ideal place for my code, and anyone can use it if required.
+\end{itemize}
+\end{appendices}
+
+
+
+
+
+\bibliographystyle{acm}
+\bibliography{references}
+
+\end{spacing}
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%}}
+
